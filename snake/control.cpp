@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
-#include <graphics.h>
 #include <Windows.h>
 #include <ctype.h>
 #include <random>
-
-//头不能回头吃自己
 
 char key_down;
 char rectang[50][50];
@@ -15,7 +12,7 @@ int n_snake=1;
 int food_x , food_y;
 std::random_device rd;
 std::mt19937 gen(rd());
-std::uniform_int_distribution<int> distribution(2, 48);
+std::uniform_int_distribution<int> distribution(2, 47);
 
 void initialize();
 void show();
@@ -24,7 +21,7 @@ void move_left();
 void move_right();
 void move_up();
 void move_down();
-void snake_add();
+void win();
 
 int main()
 {
@@ -32,52 +29,40 @@ int main()
 	food_x = distribution(gen);
 	food_y = distribution(gen);
 	rectang[food_x][food_y] = '$';
+	show();
 	while (1)
 	{
-		if (n_snake >= 10)
-		{
-			gameover();
-		}
 		if (snake_x[0] < 1 || snake_y[0] < 1 || snake_x[0] >48 || snake_y[0] >48)
 		{
 			gameover();
 		}
-		show();
-		key_down = _getch();
-		if (food_x == snake_x[0] && food_y == snake_y[0])
+		if (n_snake >= 10)
 		{
-			snake_add();
-			n_snake +=1;
-			food_x = distribution(gen);
-			food_y = distribution(gen);
-			rectang[food_x][food_y] = '$';
+			win();
 		}
+		key_down = _getch();
 		switch (key_down)
 		{
-			case 27:
-				gameover();
-				break;
-
-			case 'a':
-				move_left();
-				break;
-
-			case 'w':
-				move_up();
-				break;
-
-			case 'd':
-				move_right();
-				break;
-
-			case 's':
-				move_down();
-				break;
-
-			default:
-				break;
+		case 27:
+			gameover();
+			break;
+		case 'a':
+			move_left();
+			break;
+		case 'w':
+			move_up();
+			break;
+		case 'd':
+			move_right();
+			break;
+		case 's':
+			move_down();
+			break;
+		default:
+			break;
 		}
 		system("cls");
+		show();
 	}
 	return 0;
 }
@@ -91,178 +76,168 @@ void show()
 		{
 			putchar(rectang[i][j]);
 		}
-		printf("\n");
+		putchar('\n');
 	}
 }
 
 void move_left()
 {
-	if (snake_y[0] - 1 == snake_y[1])
-	{
-		system("cls");
-		printf("You can't eat yourself!");
-		Sleep(5000);
-		gameover();
-	}
 	int i;
-	if (n_snake == 1)
+	for (i = 1; i < n_snake; i++)
 	{
-		rectang[snake_x[0]][snake_y[0]] = ' ';
-		snake_y[0] -= 1;
-		rectang[snake_x[0]][snake_y[0]] = '@';
-		return;
+		if (snake_y[0] - 1 == snake_y[i] && snake_x[0] == snake_x[i])
+		{
+			system("cls");
+			printf("You can't eat yourself!");
+			Sleep(5000);
+			gameover();
+		}
 	}
 	for (i = 0; i < n_snake; i++)
 	{
 		rectang[snake_x[i]][snake_y[i]] = ' ';
 	}
-	for (i = n_snake - 1; i >= 0; i--)
+	for (i = n_snake - 1; i > 0; i--)
 	{
-		snake_x[i + 1] = snake_x[i];
-		snake_y[i + 1] = snake_y[i];
+		snake_x[i] = snake_x[i - 1];
+		snake_y[i] = snake_y[i - 1];
 	}
 	snake_y[0] -= 1;
-	for (i = 0; i < n_snake; i++)
+	rectang[snake_x[0]][snake_y[0]] = '@';
+	for (i = 1; i < n_snake; i++)
 	{
-		if (i == 0)
-		{
-			rectang[snake_x[i]][snake_y[i]] = '@';
-		}
-		else
-		{
-			rectang[snake_x[i]][snake_y[i]] = '#';
-		}
+		rectang[snake_x[i]][snake_y[i]] = '#';
+	}
+	if (food_x == snake_x[0] && food_y == snake_y[0])
+	{
+		snake_x[n_snake] = snake_x[n_snake - 1];
+		snake_y[n_snake] = snake_y[n_snake - 1] + 1;
+		rectang[snake_x[n_snake]][snake_y[n_snake]] = '#';
+		n_snake += 1;
+		food_x = distribution(gen);
+		food_y = distribution(gen);
+		rectang[food_x][food_y] = '$';
 	}
 }
-
 
 void move_right()
 {
-	if (snake_y[0] + 1 == snake_y[1])
-	{
-		system("cls");
-		printf("You can't eat yourself!");
-		Sleep(5000);
-		gameover();
-	}
 	int i;
-	if (n_snake == 1)
+	for (i = 1; i < n_snake; i++)
 	{
-		rectang[snake_x[0]][snake_y[0]] = ' ';
-		snake_y[0] += 1;
-		rectang[snake_x[0]][snake_y[0]] = '@';
-		return;
+		if (snake_y[0] + 1 == snake_y[i] && snake_x[0] == snake_x[i])
+		{
+			system("cls");
+			printf("You can't eat yourself!");
+			Sleep(5000);
+			gameover();
+		}
 	}
 	for (i = 0; i < n_snake; i++)
 	{
 		rectang[snake_x[i]][snake_y[i]] = ' ';
 	}
-	for (i = n_snake - 1; i >= 0; i--)
+	for (i = n_snake - 1; i > 0; i--)
 	{
-		snake_x[i + 1] = snake_x[i];
-		snake_y[i + 1] = snake_y[i];
+		snake_x[i] = snake_x[i - 1];
+		snake_y[i] = snake_y[i - 1];
 	}
 	snake_y[0] += 1;
-	for (i = 0; i < n_snake; i++)
+	rectang[snake_x[0]][snake_y[0]] = '@';
+	for (i = 1; i < n_snake; i++)
 	{
-		if (i == 0)
-		{
-			rectang[snake_x[i]][snake_y[i]] = '@';
-		}
-		else
-		{
-			rectang[snake_x[i]][snake_y[i]] = '#';
-		}
+		rectang[snake_x[i]][snake_y[i]] = '#';
+	}
+	if (food_x == snake_x[0] && food_y == snake_y[0])
+	{
+		snake_x[n_snake] = snake_x[n_snake - 1];
+		snake_y[n_snake] = snake_y[n_snake - 1] - 1;
+		rectang[snake_x[n_snake]][snake_y[n_snake]] = '#';
+		n_snake += 1;
+		food_x = distribution(gen);
+		food_y = distribution(gen);
+		rectang[food_x][food_y] = '$';
 	}
 }
-
 
 void move_up()
 {
-	if (snake_x[0] - 1 == snake_x[1])
-	{
-		system("cls");
-		printf("You can't eat yourself!");
-		Sleep(5000);
-		gameover();
-	}
 	int i;
-	if (n_snake == 1)
+	for (i = 1; i < n_snake; i++)
 	{
-		rectang[snake_x[0]][snake_y[0]] = ' ';
-		snake_x[0] -= 1;
-		rectang[snake_x[0]][snake_y[0]] = '@';
-		return;
+		if (snake_x[0] - 1 == snake_x[i] && snake_y[0] == snake_y[i])
+		{
+			system("cls");
+			printf("You can't eat yourself!");
+			Sleep(5000);
+			gameover();
+		}
 	}
 	for (i = 0; i < n_snake; i++)
 	{
 		rectang[snake_x[i]][snake_y[i]] = ' ';
 	}
-	for (i = n_snake - 1; i >= 0; i--)
+	for (i = n_snake - 1; i > 0; i--)
 	{
-		snake_x[i + 1] = snake_x[i];
-		snake_y[i + 1] = snake_y[i];
+		snake_x[i] = snake_x[i - 1];
+		snake_y[i] = snake_y[i - 1];
 	}
 	snake_x[0] -= 1;
-	for (i = 0; i < n_snake; i++)
+	rectang[snake_x[0]][snake_y[0]] = '@';
+	for (i = 1; i < n_snake; i++)
 	{
-		if (i == 0)
-		{
-			rectang[snake_x[i]][snake_y[i]] = '@';
-		}
-		else
-		{
-			rectang[snake_x[i]][snake_y[i]] = '#';
-		}
+		rectang[snake_x[i]][snake_y[i]] = '#';
+	}
+	if (food_x == snake_x[0] && food_y == snake_y[0])
+	{
+		snake_x[n_snake] = snake_x[n_snake - 1] + 1;
+		snake_y[n_snake] = snake_y[n_snake - 1];
+		rectang[snake_x[n_snake]][snake_y[n_snake]] = '#';
+		n_snake += 1;
+		food_x = distribution(gen);
+		food_y = distribution(gen);
+		rectang[food_x][food_y] = '$';
 	}
 }
 
-
 void move_down()
-{ 
-	if (snake_x[0] + 1 == snake_x[1])
-	{
-		system("cls");
-		printf("You can't eat yourself!");
-		Sleep(5000);
-		gameover();
-	}
+{
 	int i;
-	if (n_snake == 1)
+	for (i = 1; i < n_snake; i++)
 	{
-		rectang[snake_x[0]][snake_y[0]] = ' ';
-		snake_x[0] += 1;
-		rectang[snake_x[0]][snake_y[0]] = '@';
-		return;
+		if (snake_x[0] + 1 == snake_x[i] && snake_y[0] == snake_y[i])
+		{
+			system("cls");
+			printf("You can't eat yourself!");
+			Sleep(5000);
+			gameover();
+		}
 	}
 	for (i = 0; i < n_snake; i++)
 	{
 		rectang[snake_x[i]][snake_y[i]] = ' ';
 	}
-	for (i = n_snake-1; i >= 0; i--)
+	for (i = n_snake - 1; i > 0; i--)
 	{
-		snake_x[i+1] = snake_x[i];
-		snake_y[i + 1] = snake_y[i];
+		snake_x[i] = snake_x[i - 1];
+		snake_y[i] = snake_y[i - 1];
 	}
 	snake_x[0] += 1;
-	for (i = 0; i < n_snake; i++)
+	rectang[snake_x[0]][snake_y[0]] = '@';
+	for (i = 1; i < n_snake; i++)
 	{
-		if (i == 0)
-		{
-			rectang[snake_x[i]][snake_y[i]] = '@';
-		}
-		else
-		{
-			rectang[snake_x[i]][snake_y[i]] = '#';
-		}
+		rectang[snake_x[i]][snake_y[i]] = '#';
 	}
-}
-
-void snake_add()
-{
-	snake_x[n_snake] = snake_x[n_snake - 1];
-	snake_y[n_snake] = snake_y[n_snake - 1] - 1;
-	rectang[snake_x[n_snake]][snake_y[n_snake]] = '#';
+	if (food_x == snake_x[0] && food_y == snake_y[0])
+	{
+		snake_x[n_snake] = snake_x[n_snake - 1] - 1;
+		snake_y[n_snake] = snake_y[n_snake - 1];
+		rectang[snake_x[n_snake]][snake_y[n_snake]] = '#';
+		n_snake += 1;
+		food_x = distribution(gen);
+		food_y = distribution(gen);
+		rectang[food_x][food_y] = '$';
+	}
 }
 
 void initialize()
@@ -272,17 +247,17 @@ void initialize()
 	{
 		for (j = 0; j < 50; j++)
 		{
-			if (j == 0 || i==0 || j==49 || i==49)
+			if (j == 0 || i == 0 || j == 49 || i == 49)
 			{
-				rectang[i][j] ='+';
+				rectang[i][j] = '+';
 			}
-			else if (i==1 && j==1)
+			else if (i == 1 && j == 1)
 			{
 				rectang[i][j] = '@';
 			}
 			else
 			{
-				rectang[i][j] =' ';
+				rectang[i][j] = ' ';
 			}
 		}
 	}
@@ -291,12 +266,16 @@ void initialize()
 	snake_y[0] = 1;
 }
 
+void win()
+{
+	system("cls");
+	printf("You win. Congration\n");
+	exit(0);
+}
+
 void gameover()
 {
-	initgraph(150, 150);
-	TCHAR over[] = _T("GameOver!");
-	outtextxy(0, 0, over);
-	Sleep(5000);
-	closegraph();
+	system("cls");
+	printf("You loss. Game over\n");
 	exit(0);
 }
